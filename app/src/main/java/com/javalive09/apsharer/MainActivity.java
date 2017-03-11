@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final String HOST = "192.168.43.1:8080";
+    private static final String HOST = "http://192.168.43.1:8080";
     private static final String PACKAGE_URL_SCHEME = "package:";
     private final int REQUEST_CODE = 123;
     private static int kJobId = 456;
