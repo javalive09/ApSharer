@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">ApSharer</string>
+    <string name="start">开启热点</string>
+    <string name="loading">开启中&#8230;</string>
+    <string name="select">选择要分享的文件</string>
+    <string name="chooser_title">要生成二维码的文件</string>
+
+    <string name="empty_directory">Empty Directory</string>
+    <string name="storage_removed">Storage was removed or unmounted.</string>
+    <string name="choose_file">Select a file</string>
+    <string name="error_selecting_file">Error selecting File</string>
+    <string name="internal_storage">Internal storage</string>
+
+    <string name="action_about">关于</string>
+    <string name="action_exit">退出</string>
+    <string name="action_feedback">反馈</string>
+    <string name="action_help">帮助</string>
+    <string name="action_about_txt">热点分享工具,可以在没有wifi的情况下一键分享手机中的图片，视频，音乐等大文件给朋友，简单，实用</string>
+
+
+</resources>
