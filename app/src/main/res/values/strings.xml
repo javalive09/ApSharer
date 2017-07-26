@@ -18,5 +18,33 @@
     <string name="action_help">帮助</string>
     <string name="action_about_txt">热点分享工具,可以在没有wifi的情况下一键分享手机中的图片，视频，音乐等大文件给朋友，简单，实用</string>
 
+    <item name="appinfo" type="id"></item>
+    <item name="appinfoid" type="id"></item>
+
+
+    <string name="action_detail">详细信息</string>
+    <string name="action_launch">启动</string>
+    <string name="action_uninstall">卸载</string>
+    <string name="action_share">分享</string>
+    <string name="action_help_txt"></string>
+    <string name="action_show">显示方式</string>
+    <string name="action_refresh">刷新</string>
+    <string name="action_allapp">显示全部应用</string>
+    <string name="action_thirdapp">显示非系统应用</string>
+    <string name="action_grid">宫格方式排列</string>
+    <string name="action_list">列表方式排列</string>
+    <string name="action_feedback_txt">程序快速管理工具,可以清缓存,卸载软件</string>
+
+    <string name="setting_feedback">反馈建议</string>
+    <string name="setting_layout">布局类型</string>
+    <string name="setting_feedback_body">您的反馈和建议</string>
+    <string name="setting_feedback_address">mailto:javalive09@163.com</string>
+
+    <string-array name="layout">
+        <item>列表</item>
+        <item>宫格</item>
+    </string-array>
+
+
 
 </resources>

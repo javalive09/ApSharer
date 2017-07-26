@@ -29,6 +29,7 @@
         </activity>
 
         <service android:name="com.javalive09.apsharer.MainService" />
+        <activity android:name=".applist.MainActivity" />
     </application>
 
 </manifest>

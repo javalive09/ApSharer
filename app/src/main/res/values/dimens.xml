@@ -25,5 +25,10 @@
     <dimen name="list_padding">0dp</dimen>
     <dimen name="list_item_padding">16dp</dimen>
 
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="item_cell">90dp</dimen>
+    <dimen name="list_item_cell">50dp</dimen>
+    <dimen name="item_min_w">200dp</dimen>
 
 </resources>

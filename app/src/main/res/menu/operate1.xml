@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity1">
+
+    <item
+        android:id="@+id/action_launch"
+        android:orderInCategory="1"
+        android:title="@string/action_launch"/>
+    <item
+        android:id="@+id/action_detail"
+        android:orderInCategory="1"
+        android:title="@string/action_detail"/>
+    <item
+        android:id="@+id/action_uninstall"
+        android:orderInCategory="2"
+        android:title="@string/action_uninstall"/>
+    <item
+        android:id="@+id/action_share"
+        android:orderInCategory="3"
+        android:title="@string/action_share"/>
+</menu>

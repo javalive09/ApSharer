@@ -228,7 +228,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case R.id.app:
-
+                Intent intent = new Intent(MainActivity.this, com.javalive09.apsharer.applist.MainActivity.class);
+                startActivityForResult(intent, REQUEST_CODE);
                 break;
         }
     }
@@ -263,16 +264,19 @@ public class MainActivity extends AppCompatActivity {
             if (wifiApState == 13) { //WifiManager.WIFI_AP_STATE_ENABLED
                 String text = "WiFi热点创建成功\n名称:" + WifiApManager.DEFAULT_SSID + "\n密码：" + WifiApManager.DEFAULT_PASSWORD;
                 ((TextView) findViewById(R.id.hint)).setText(text);
+                findViewById(R.id.start).setEnabled(true);
                 ((TextView) findViewById(R.id.start)).setText(R.string.select);
                 findViewById(R.id.app).setVisibility(View.VISIBLE);
             } else if (wifiApState == 11) {// WifiManager.WIFI_AP_STATE_DISABLED
                 if (findViewById(R.id.app).getVisibility() == View.VISIBLE) {//过滤掉首次关闭ap的情况
                     ((TextView) findViewById(R.id.hint)).setText("");
+                    findViewById(R.id.start).setEnabled(true);
                     ((TextView) findViewById(R.id.start)).setText(R.string.start);
                     findViewById(R.id.app).setVisibility(View.INVISIBLE);
                 }
             } else if (wifiApState == 12) {// WifiManager.WIFI_AP_STATE_ENABLING
                 ((TextView) findViewById(R.id.start)).setText(R.string.loading);
+                findViewById(R.id.start).setEnabled(false);
             }
         }
 
