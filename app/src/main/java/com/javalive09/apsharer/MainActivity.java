@@ -110,6 +110,8 @@ public class MainActivity extends AppCompatActivity {
                 String text = "WiFi热点创建成功\n名称:" + WifiApManager.DEFAULT_SSID + "\n密码：" + WifiApManager.DEFAULT_PASSWORD;
                 setHint(text);
                 setButtonTxt(R.string.select);
+                findViewById(R.id.app).setVisibility(View.VISIBLE);
+
 //                arpFileObserver.startWatching();
 //                checkoutArp();
                 break;
@@ -305,6 +307,7 @@ public class MainActivity extends AppCompatActivity {
                 setButtonTxt(R.string.loading);
 //                checkoutArp();
                 break;
+
         }
     }
 

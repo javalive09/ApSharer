@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 /**
+ * 监听设备连入热点
  * Created by peter on 2017/3/10.
  */
 
