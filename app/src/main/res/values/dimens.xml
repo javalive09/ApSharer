@@ -17,8 +17,8 @@
 
     <dimen name="margin">16dp</dimen>
     <dimen name="margin_large">32dp</dimen>
-    <dimen name="qr_cell">280dp</dimen>
-    <dimen name="button_w">280dp</dimen>
+    <dimen name="qr_cell">200dp</dimen>
+    <dimen name="button_w">200dp</dimen>
     <dimen name="button_h">70dp</dimen>
     <dimen name="start_txt_size">25sp</dimen>
 

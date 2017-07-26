@@ -34,10 +34,24 @@
         android:onClick="onClick"
         android:text="@string/start"
         android:textColor="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/qr" />
+
+    <Button
+        android:id="@+id/app"
+        android:layout_width="@dimen/button_w"
+        android:layout_height="@dimen/button_h"
+        android:layout_margin="@dimen/margin"
+        android:background="@drawable/button_bg"
+        android:onClick="onClick"
+        android:text="@string/select_app"
+        android:textColor="@android:color/white"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/start" />
 
 
 </android.support.constraint.ConstraintLayout>

@@ -15,7 +15,12 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.wifi.ScanResult;
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.FileObserver;
 import android.os.IBinder;
 import android.provider.MediaStore;
@@ -39,6 +44,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String HOST = "http://192.168.43.1:8080";
     private static final String PACKAGE_URL_SCHEME = "package:";
     private final int REQUEST_CODE = 123;
-    private static int kJobId = 456;
     final private int REQUEST_CODE_ASK_PERMISSIONS = 789;
     private MainService service;
     private boolean mBound;
@@ -57,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         startService(new Intent(MainActivity.this, MainService.class));
         bindService(new Intent(MainActivity.this, MainService.class), serviceConnection, BIND_AUTO_CREATE);
     }
@@ -67,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
             service = (MainService) ((MainService.MyBinder) binder).getService();
+            listener.onWifiApStateChanged(service.getWifiApState());
             mBound = true;
         }
 
@@ -76,67 +81,6 @@ public class MainActivity extends AppCompatActivity {
             mBound = false;
         }
     };
-
-    SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if (TextUtils.equals(SharedPreferencesUtil.ACTION_AP_STATUS, key)) {
-                refreshButton();
-            } else if (TextUtils.equals(SharedPreferencesUtil.ACTION_HAVE_CLIENT, key)) {
-                refreshHint();
-            }
-        }
-    };
-
-    private void refreshHint() {
-        boolean have = SharedPreferencesUtil.haveClient(getApplicationContext());
-        String text;
-        if (have) {
-            text = "扫描所选文件生成的二维码，并下载";
-        } else {
-            text = "WiFi热点创建成功\n名称:" + WifiApManager.DEFAULT_SSID + "\n密码：" + WifiApManager.DEFAULT_PASSWORD;
-        }
-        setHint(text);
-    }
-
-    private void refreshButton() {
-        int status = SharedPreferencesUtil.getApStatus(getApplicationContext());
-        switch (status) {
-            case SharedPreferencesUtil.ACTION_AP_CLOSED:
-                setHint("");
-                setButtonTxt(R.string.start);
-                break;
-            case SharedPreferencesUtil.ACTION_AP_OPENED:
-                String text = "WiFi热点创建成功\n名称:" + WifiApManager.DEFAULT_SSID + "\n密码：" + WifiApManager.DEFAULT_PASSWORD;
-                setHint(text);
-                setButtonTxt(R.string.select);
-//                arpFileObserver.startWatching();
-//                checkoutArp();
-                break;
-            case SharedPreferencesUtil.ACTION_AP_OPENING:
-                setHint("");
-                setButtonTxt(R.string.loading);
-                break;
-        }
-    }
-
-    public void cancelJobs() {
-        JobScheduler tm = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        tm.cancel(kJobId);
-    }
-
-//    private void checkoutArp() {
-//        ComponentName serviceComponent = new ComponentName(this, ArpService.class);
-//        JobInfo.Builder builder = new JobInfo.Builder(kJobId, serviceComponent);
-//        builder.setPeriodic(2000);
-////        builder.setMinimumLatency(100); // wait at least 延时执行时间
-////        builder.setOverrideDeadline(2000);// maximum delay 设置最大延时
-////        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY); // require unmetered network
-////        builder.setRequiresDeviceIdle(false); // device should be idle
-////        builder.setRequiresCharging(false); // we don't care if the device is charging or not
-//        JobScheduler jobScheduler = (JobScheduler) getApplication().getSystemService(Context.JOB_SCHEDULER_SERVICE);
-//        jobScheduler.schedule(builder.build());
-//    }
 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -166,21 +110,6 @@ public class MainActivity extends AppCompatActivity {
         return dialog;
     }
 
-
-    private void setButtonTxt(int resId) {
-        TextView view = (TextView) findViewById(R.id.start);
-        switch (resId) {
-            case R.string.loading:
-                view.setEnabled(false);
-                break;
-            default:
-                view.setEnabled(true);
-                break;
-        }
-        String txt = getString(resId);
-        view.setText(txt);
-    }
-
     private int getButtonType() {
         TextView view = (TextView) findViewById(R.id.start);
         String txt = view.getText().toString();
@@ -203,14 +132,6 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             return;
         }
-        refreshButton();
-        SharedPreferencesUtil.addListener(getApplicationContext(), listener);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        SharedPreferencesUtil.removeListener(getApplicationContext(), listener);
     }
 
     @Override
@@ -283,34 +204,113 @@ public class MainActivity extends AppCompatActivity {
         if (mBound) {
             stopService(new Intent(MainActivity.this, MainService.class));
         }
-        cancelJobs();
-        SharedPreferencesUtil.setApStatus(getApplicationContext(), SharedPreferencesUtil.ACTION_AP_CLOSED);
         finish();
     }
 
     public void onClick(View view) {
-        switch (getButtonType()) {
-            case R.string.select:
-                if (passPermission()) {
-                    showChooser();
+        switch (view.getId()) {
+            case R.id.start:
+                switch (getButtonType()) {
+                    case R.string.select:
+                        if (passPermission()) {
+                            showChooser();
+                        }
+                        break;
+                    case R.string.start:
+                        if (service != null) {
+                            service.setForeground();
+                            service.startAp(listener);
+                            service.startServer();
+                        }
+                        ((TextView) findViewById(R.id.start)).setText(R.string.loading);
+                        break;
                 }
                 break;
-            case R.string.start:
-                if (service != null) {
-                    service.setForeground();
-                    service.startAp();
-                    service.startServer();
-                }
-                SharedPreferencesUtil.setApStatus(getApplicationContext(), SharedPreferencesUtil.ACTION_AP_OPENING);
-                setButtonTxt(R.string.loading);
-//                checkoutArp();
+
+            case R.id.app:
+
                 break;
         }
     }
 
-    private void setHint(String hint) {
-        ((TextView) findViewById(R.id.hint)).setText(hint);
-    }
+    private WifiApManager.WifiStateListener listener = new WifiApManager.WifiStateListener() {
+
+        @Override
+        public void onScanFinished(List<ScanResult> scanResults) {
+            Log.i(TAG, "onScanFinished");
+        }
+
+        @Override
+        public void onSupplicantStateChanged(SupplicantState state, int supplicantError) {
+            Log.i(TAG, "onSupplicantStateChanged: " + state);
+        }
+
+        @Override
+        public void onSupplicantConnectionChanged(boolean connected) {
+            Log.i(TAG, "onSupplicantConnectionChanged: " + connected);
+        }
+
+        @Override
+        public void onWifiStateChanged(int wifiState, int prevWifiState) {
+            Log.i(TAG, "onWifiStateChanged: " + wifiState);
+            if (wifiState == WifiManager.WIFI_STATE_ENABLED) {
+            }
+        }
+
+        @Override
+        public void onWifiApStateChanged(int wifiApState) {
+            Log.i(TAG, "onWifiApStateChanged: " + wifiApState);
+            if (wifiApState == 13) { //WifiManager.WIFI_AP_STATE_ENABLED
+                String text = "WiFi热点创建成功\n名称:" + WifiApManager.DEFAULT_SSID + "\n密码：" + WifiApManager.DEFAULT_PASSWORD;
+                ((TextView) findViewById(R.id.hint)).setText(text);
+                ((TextView) findViewById(R.id.start)).setText(R.string.select);
+                findViewById(R.id.app).setVisibility(View.VISIBLE);
+            } else if (wifiApState == 11) {// WifiManager.WIFI_AP_STATE_DISABLED
+                if (findViewById(R.id.app).getVisibility() == View.VISIBLE) {//过滤掉首次关闭ap的情况
+                    ((TextView) findViewById(R.id.hint)).setText("");
+                    ((TextView) findViewById(R.id.start)).setText(R.string.start);
+                    findViewById(R.id.app).setVisibility(View.INVISIBLE);
+                }
+            } else if (wifiApState == 12) {// WifiManager.WIFI_AP_STATE_ENABLING
+                ((TextView) findViewById(R.id.start)).setText(R.string.loading);
+            }
+        }
+
+        @Override
+        public void onNetworkIdsChanged() {
+            Log.i(TAG, "onNetworkIdsChanged");
+        }
+
+        @Override
+        public void onRSSIChanged(int rssi) {
+            Log.i(TAG, "onRSSIChanged: " + rssi);
+        }
+
+        @Override
+        public void onPickWifiNetwork() {
+            Log.i(TAG, "onPickWifiNetwork");
+        }
+
+        @Override
+        public void onConnectionPreparing(String ssid) {
+            Log.i(TAG, "onConnectionPreparing: " + ssid);
+        }
+
+        @Override
+        public void onConnectionPrepared(boolean success, String ssid) {
+            Log.i(TAG, "onConnectionPrepared: " + success + " , ssid : " + ssid);
+        }
+
+        @Override
+        public void onConnectNetworkSucceeded(NetworkInfo networkInfo, WifiInfo wifiInfo) {
+            Log.i(TAG, "onConnectNetworkSucceeded: " + networkInfo + " , wifiInfo : " + wifiInfo);
+        }
+
+        @Override
+        public void onConnectNetworkFailed(NetworkInfo networkInfo) {
+            Log.i(TAG, "onConnectNetworkFailed: " + networkInfo);
+        }
+    };
 
     private void showChooser() {
         // Use the GET_CONTENT intent from the utility class

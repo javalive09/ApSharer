@@ -68,7 +68,7 @@ public class MainService extends Service {
         }
     }
 
-    public void startAp() {
+    public void startAp(WifiStateListener listener) {
         if (wifiApManager == null) {
             wifiApManager = new WifiApManager(MainService.this, listener);
         }
@@ -79,6 +79,14 @@ public class MainService extends Service {
         if (wifiApManager != null) {
             wifiApManager.stopWifiAp();
             wifiApManager.destroy(MainService.this);
+        }
+    }
+
+    public int getWifiApState() {
+        if(wifiApManager != null) {
+            return wifiApManager.getWifiApState();
+        }else {
+            return 11;// WifiManager.WIFI_AP_STATE_DISABLED
         }
     }
 
@@ -100,86 +108,6 @@ public class MainService extends Service {
         notification.defaults = Notification.DEFAULT_SOUND; //设置为默认的声音
         startForeground(110, notification);// 开始前台服务
     }
-
-    private WifiStateListener listener = new WifiStateListener() {
-
-        @Override
-        public void onScanFinished(List<ScanResult> scanResults) {
-            Log.i(TAG, "onScanFinished");
-        }
-
-        @Override
-        public void onSupplicantStateChanged(SupplicantState state, int supplicantError) {
-            Log.i(TAG, "onSupplicantStateChanged: " + state);
-        }
-
-        @Override
-        public void onSupplicantConnectionChanged(boolean connected) {
-            Log.i(TAG, "onSupplicantConnectionChanged: " + connected);
-        }
-
-        @Override
-        public void onWifiStateChanged(int wifiState, int prevWifiState) {
-            Log.i(TAG, "onWifiStateChanged: " + wifiState);
-            if (wifiState == WifiManager.WIFI_STATE_ENABLED) {
-//                            MainService.this.stopForeground(true);
-//                            NotificationManager manager = (NotificationManager) getApplicationContext().getSystemService(NOTIFICATION_SERVICE);
-//                            manager.cancel(110);
-//                            android.os.Process.killProcess(android.os.Process.myPid());
-            }
-        }
-
-        @Override
-        public void onWifiApStateChanged(int wifiApState) {
-            Log.i(TAG, "onWifiApStateChanged: " + wifiApState);
-            if (wifiApState == 13) { //WifiManager.WIFI_AP_STATE_ENABLED
-                SharedPreferencesUtil.setApStatus(getApplicationContext(), SharedPreferencesUtil.ACTION_AP_OPENED);
-            }else if(wifiApState == 11) {// WifiManager.WIFI_AP_STATE_DISABLED
-                int status = SharedPreferencesUtil.getApStatus(getApplicationContext());
-                if(status != SharedPreferencesUtil.ACTION_AP_OPENING) {
-                    SharedPreferencesUtil.setApStatus(getApplicationContext(), SharedPreferencesUtil.ACTION_AP_CLOSED);
-                }
-            }else if(wifiApState == 12) {// WifiManager.WIFI_AP_STATE_ENABLING
-                SharedPreferencesUtil.setApStatus(getApplicationContext(), SharedPreferencesUtil.ACTION_AP_OPENING);
-            }
-        }
-
-        @Override
-        public void onNetworkIdsChanged() {
-            Log.i(TAG, "onNetworkIdsChanged");
-        }
-
-        @Override
-        public void onRSSIChanged(int rssi) {
-            Log.i(TAG, "onRSSIChanged: " + rssi);
-        }
-
-        @Override
-        public void onPickWifiNetwork() {
-            Log.i(TAG, "onPickWifiNetwork");
-        }
-
-        @Override
-        public void onConnectionPreparing(String ssid) {
-            Log.i(TAG, "onConnectionPreparing: " + ssid);
-        }
-
-        @Override
-        public void onConnectionPrepared(boolean success, String ssid) {
-            Log.i(TAG, "onConnectionPrepared: " + success + " , ssid : " + ssid);
-        }
-
-        @Override
-        public void onConnectNetworkSucceeded(NetworkInfo networkInfo, WifiInfo wifiInfo) {
-            Log.i(TAG, "onConnectNetworkSucceeded: " + networkInfo + " , wifiInfo : " + wifiInfo);
-        }
-
-        @Override
-        public void onConnectNetworkFailed(NetworkInfo networkInfo) {
-            Log.i(TAG, "onConnectNetworkFailed: " + networkInfo);
-        }
-    };
-
 
 
 }

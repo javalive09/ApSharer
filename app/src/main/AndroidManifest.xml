@@ -29,10 +29,6 @@
         </activity>
 
         <service android:name="com.javalive09.apsharer.MainService" />
-        <service
-            android:name=".ArpService"
-            android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 
 </manifest>
