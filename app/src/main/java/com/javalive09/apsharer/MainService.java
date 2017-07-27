@@ -55,6 +55,7 @@ public class MainService extends Service {
     public void startServer() {
         stopServer();
         simpleWebServer = new MainWebServer(8080);
+        wifiApManager = new WifiApManager(MainService.this);
         try {
             simpleWebServer.start();
         } catch (IOException e) {
@@ -68,17 +69,28 @@ public class MainService extends Service {
         }
     }
 
-    public void startAp(WifiStateListener listener) {
-        if (wifiApManager == null) {
-            wifiApManager = new WifiApManager(MainService.this, listener);
+    public void startAp() {
+        if (simpleWebServer != null) {
+            wifiApManager.startWifiAp();
         }
-        wifiApManager.startWifiAp();
+    }
+
+    public void setListener(WifiStateListener listener) {
+        if (simpleWebServer != null) {
+            wifiApManager.setmWifiStateListener(listener);
+        }
     }
 
     public void stopAp() {
         if (wifiApManager != null) {
             wifiApManager.stopWifiAp();
             wifiApManager.destroy(MainService.this);
+        }
+    }
+
+    public void closeAp() {
+        if(wifiApManager != null) {
+            wifiApManager.closeWifiAp();
         }
     }
 

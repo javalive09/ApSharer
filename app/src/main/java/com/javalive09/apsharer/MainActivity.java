@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
             service = (MainService) ((MainService.MyBinder) binder).getService();
-            listener.onWifiApStateChanged(service.getWifiApState());
+            service.closeAp();
             mBound = true;
         }
 
@@ -224,8 +224,9 @@ public class MainActivity extends AppCompatActivity {
                     case R.string.start:
                         if (service != null) {
                             service.setForeground();
-                            service.startAp(listener);
                             service.startServer();
+                            service.startAp();
+                            service.setListener(listener);
                         }
                         ((TextView) findViewById(R.id.start)).setText(R.string.loading);
                         break;
@@ -371,18 +372,18 @@ public class MainActivity extends AppCompatActivity {
         } else if (mineType.contains("text/")) {
             image = BitmapFactory.decodeResource(getResources(), R.drawable.ic_txt);
         } else if (mineType.contains("application/")) {
-            if(info != null) {
+            if (info != null) {
                 PackageManager mPm = getPackageManager();
                 Drawable drawable = info.loadIcon(mPm);
-                if(drawable instanceof BitmapDrawable) {
+                if (drawable instanceof BitmapDrawable) {
                     BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
                     image = bitmapDrawable.getBitmap();
-                }else if(drawable instanceof VectorDrawable) {
-                    VectorDrawable vectorDrawable = (VectorDrawable)drawable;
+                } else if (drawable instanceof VectorDrawable) {
+                    VectorDrawable vectorDrawable = (VectorDrawable) drawable;
                     image = getBitmap(vectorDrawable);
                 }
             }
-            if(image == null) {
+            if (image == null) {
                 image = BitmapFactory.decodeResource(getResources(), R.drawable.ic_apk);
             }
 

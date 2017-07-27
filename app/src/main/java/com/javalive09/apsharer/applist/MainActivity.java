@@ -21,11 +21,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.PopupMenu;
 
 import com.javalive09.apsharer.R;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +37,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private AppAdapter defaultAdapter;
     private AppGridAdapter appGridAdapter;
-    private ApplicationInfo clickInfo;
     private RecyclerView recyclerView;
     private static final int NO_SYS = 0;
     private static final int ALL = 1;
@@ -203,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         final ApplicationInfo info = (ApplicationInfo) v.getTag(R.id.appinfo);
-        String path = "file:/" + info.publicSourceDir;
+        String path = "file://data" + info.publicSourceDir;
         Intent intent = new Intent();
         Uri uri = Uri.parse(path);
         intent.setData(uri);
@@ -212,16 +209,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         finish();
     }
 
-    private void addClickCount(ApplicationInfo info) {
-        if (info != null) {
-            SharedPreferences headSp = getSharedPreferences("head_item", MODE_PRIVATE);
-            headSp.edit().putString("package_name", info.packageName).commit();
-        }
-    }
-
     @Override
     protected void onDestroy() {
-        addClickCount(clickInfo);
         super.onDestroy();
     }
 

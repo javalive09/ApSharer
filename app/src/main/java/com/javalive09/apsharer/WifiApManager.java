@@ -152,9 +152,8 @@ public class WifiApManager {
      * @param context 上下文
      * @param listener WifiStateListener
      */
-    public WifiApManager(Context context, WifiStateListener listener) {
+    public WifiApManager(Context context) {
         mWifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
-        mWifiStateListener = listener;
 
         mWifiLock = mWifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, SSID_PREFIX);
 
@@ -172,6 +171,10 @@ public class WifiApManager {
         }
 
         context.registerReceiver(mWifiReceiver, intentFilter);
+    }
+
+    public void setmWifiStateListener(WifiStateListener listener) {
+        mWifiStateListener = listener;
     }
 
     /**
@@ -330,7 +333,7 @@ public class WifiApManager {
         }
     }
 
-    private void closeWifiAp() {
+    public void closeWifiAp() {
         if (isWifiApEnabled()) {
             setWifiApEnabled(getWifiApConfiguration(), false);
         }
