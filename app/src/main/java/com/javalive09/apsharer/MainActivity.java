@@ -237,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, com.javalive09.apsharer.applist.MainActivity.class);
                 startActivityForResult(intent, REQUEST_CODE);
                 break;
+
         }
     }
 
