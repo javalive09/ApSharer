@@ -202,12 +202,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        popupMenuNormal(v);
         final ApplicationInfo info = (ApplicationInfo) v.getTag(R.id.appinfo);
         String path = "file:/" + info.publicSourceDir;
         Intent intent = new Intent();
         Uri uri = Uri.parse(path);
         intent.setData(uri);
+        intent.putExtra("info", info);
         setResult(RESULT_OK, intent);
         finish();
     }
@@ -224,68 +224,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         addClickCount(clickInfo);
         super.onDestroy();
     }
-
-    private void showDetailStopView(ApplicationInfo info) {
-        if (info != null) {
-            int version = Build.VERSION.SDK_INT;
-            Intent intent = new Intent();
-            if (version >= 9) {
-                intent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
-                Uri uri = Uri.fromParts("package", info.packageName, null);
-                intent.setData(uri);
-            } else {
-                final String appPkgName = "pkg";
-                intent.setAction(Intent.ACTION_VIEW);
-                intent.setClassName("com.android.settings",
-                        "com.android.settings.InstalledAppDetails");
-                intent.putExtra(appPkgName, info.packageName);
-            }
-            startActivity(intent);
-        }
-    }
-
-    private void uninstallAPP(ApplicationInfo info) {
-        if (info != null) {
-            Uri uri = Uri.parse("package:" + info.packageName);
-            Intent intent = new Intent(Intent.ACTION_DELETE);
-            intent.setData(uri);
-            startActivity(intent);
-        }
-    }
-
-    private Intent getLaunchIntent(ApplicationInfo info) {
-        return getPackageManager().getLaunchIntentForPackage(
-                info.packageName);
-    }
-
-    private void popupMenuNormal(final View anchor) {
-        final ApplicationInfo info = (ApplicationInfo) anchor.getTag(R.id.appinfo);
-        PopupMenu popup = new PopupMenu(this, anchor);
-        final Intent launchIntent = getLaunchIntent(info);
-        if (launchIntent != null) {
-            popup.getMenuInflater().inflate(R.menu.operate1, popup.getMenu());
-        } else {
-            popup.getMenuInflater().inflate(R.menu.operate, popup.getMenu());
-        }
-        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.action_launch:
-                        startActivity(launchIntent);
-                        break;
-                    case R.id.action_detail:
-                        showDetailStopView(info);
-                        break;
-                    case R.id.action_uninstall:
-                        uninstallAPP(info);
-                        break;
-                }
-                clickInfo = info;
-                return true;
-            }
-        });
-        popup.show();
-    }
-
 
 }

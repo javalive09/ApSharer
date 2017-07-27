@@ -11,9 +11,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
 import android.media.ThumbnailUtils;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -339,8 +344,9 @@ public class MainActivity extends AppCompatActivity {
                         // Get the URI of the selected file
                         final Uri uri = data.getData();
                         Log.i(TAG, "Uri = " + uri.toString());
+                        ApplicationInfo info = data.getParcelableExtra("info");
                         try {
-                            generalQR(uri);
+                            generalQR(uri, info);
                         } catch (Exception e) {
                             Log.i(TAG, "File select error = " + e);
                         }
@@ -351,11 +357,11 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void generalQR(Uri uri) throws IOException {
+    private void generalQR(Uri uri, ApplicationInfo info) throws IOException {
         // Get the file path from the URI
         final String path = FileUtils.getPath(this, uri);
         final String mineType = FileUtils.getMimeType(MainActivity.this, uri);
-        Bitmap image;
+        Bitmap image = null;
         if (mineType.contains("image/")) {
             image = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
         } else if (mineType.contains("video/")) {
@@ -365,7 +371,21 @@ public class MainActivity extends AppCompatActivity {
         } else if (mineType.contains("text/")) {
             image = BitmapFactory.decodeResource(getResources(), R.drawable.ic_txt);
         } else if (mineType.contains("application/")) {
-            image = BitmapFactory.decodeResource(getResources(), R.drawable.ic_apk);
+            if(info != null) {
+                PackageManager mPm = getPackageManager();
+                Drawable drawable = info.loadIcon(mPm);
+                if(drawable instanceof BitmapDrawable) {
+                    BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+                    image = bitmapDrawable.getBitmap();
+                }else if(drawable instanceof VectorDrawable) {
+                    VectorDrawable vectorDrawable = (VectorDrawable)drawable;
+                    image = getBitmap(vectorDrawable);
+                }
+            }
+            if(image == null) {
+                image = BitmapFactory.decodeResource(getResources(), R.drawable.ic_apk);
+            }
+
         } else {
             image = BitmapFactory.decodeResource(getResources(), R.drawable.ic_txt);
         }
@@ -377,6 +397,16 @@ public class MainActivity extends AppCompatActivity {
         setTitle(path);
         Bitmap bitmap = QRCode.createQRCodeWithLogo5(HOST + path, getResources().getDimensionPixelSize(R.dimen.qr_cell), image);
         ((ImageView) findViewById(R.id.qr)).setImageBitmap(bitmap);
+    }
+
+
+    private static Bitmap getBitmap(VectorDrawable vectorDrawable) {
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
+                vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        vectorDrawable.draw(canvas);
+        return bitmap;
     }
 
     /**
